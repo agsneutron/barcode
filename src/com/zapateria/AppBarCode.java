@@ -7,9 +7,14 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import javax.imageio.ImageIO;
 
+import com.modelo.Conexion;
 import net.sourceforge.jbarcodebean.BarcodeException;
 import net.sourceforge.jbarcodebean.JBarcodeBean;
 import net.sourceforge.jbarcodebean.model.Interleaved25;
@@ -24,13 +29,15 @@ public class AppBarCode {
 
     public AppBarCode() {
         creaCodigoDeBarrasButton.addActionListener(new ActionListener() {
-            @Override
+
             public void actionPerformed(ActionEvent e) {
                 createBarCode(txtCodigo.getText());
+                guardaCódigoBarras(txtCodigo.getText());
                 JOptionPane.showMessageDialog(null,txtCodigo.getText());
             }
         });
     }
+
 
     public static void createBarCode(String code){
 
@@ -51,6 +58,25 @@ public class AppBarCode {
         try {
             ImageIO.write(bufferedImage, "png", file);
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void guardaCódigoBarras(String codigo){
+        PreparedStatement pS;
+        ResultSet rS;
+        Connection con;
+        Conexion conn = new Conexion();
+        con = conn.getConexion();
+
+        try {
+            pS = con.prepareStatement("Select * from almacen_articulo");
+            rS = pS.executeQuery();
+            while (rS.next()){
+                createBarCode(rS.getString("clave"));
+            }
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
